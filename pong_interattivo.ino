@@ -3,6 +3,11 @@
  * Original Code from https://github.com/rparrett/pongclock
  * Modified by Ing. Di Filippo Giugno 2025
  */
+/*
+ * Pong
+ * Original Code from https://github.com/rparrett/pongclock
+ *
+ */
 
 #define BLACK 0x0000
 #define WHITE 0xFFFF
@@ -16,7 +21,7 @@ TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 int16_t h = 128;
 int16_t w = 160;
 
-int dly = 20;
+int dly = 10;
 
 int16_t paddle_h = 25;
 int16_t paddle_w = 2;
@@ -59,8 +64,8 @@ int16_t lscore = 0; // Punteggio del giocatore (tu)
 int16_t rscore = 0; // Punteggio dell'avversario
 
 // --- Definizioni per i pulsanti ---
-#define BUTTON_UP_PIN 2 // GP2 per spostare il paddle in su
-#define BUTTON_DOWN_PIN 3 // GP3 per spostare il paddle in giù
+#define BUTTON_UP_PIN 3 // GP2 per spostare il paddle in su
+#define BUTTON_DOWN_PIN 2 // GP3 per spostare il paddle in giù
 
 // Variabili per il debounce dei pulsanti (opzionale ma consigliato)
 unsigned long lastButtonUpTime = 0;
@@ -224,14 +229,14 @@ void ball() {
   ball_x = ball_x + ball_dx;
   ball_y = ball_y + ball_dy;
 
-  if (ball_dx == -1 && ball_x == paddle_w && ball_y + ball_h >= lpaddle_y && ball_y <= lpaddle_y + paddle_h) {
+  if (ball_dx == -1 && ball_x == paddle_w && ball_y + ball_h >= lpaddle_y && ball_y <= lpaddle_y + paddle_h) { //se la palla è sul paddle di sx
+    ball_dx = ball_dx * -1;//cambia direzione
+    //dly = random(5); // change speed of ball after paddle contact
+    calc_target_y();  
+  } else if (ball_dx == 1 && ball_x + ball_w == w - paddle_w && ball_y + ball_h >= rpaddle_y && ball_y <= rpaddle_y + paddle_h) { //Siamo sul paddle di dx 
     ball_dx = ball_dx * -1;
     //dly = random(5); // change speed of ball after paddle contact
-    calc_target_y(); 
-  } else if (ball_dx == 1 && ball_x + ball_w == w - paddle_w && ball_y + ball_h >= rpaddle_y && ball_y <= rpaddle_y + paddle_h) {
-    ball_dx = ball_dx * -1;
-    //dly = random(5); // change speed of ball after paddle contact
-    calc_target_y();
+   
   } else if ((ball_dx == 1 && ball_x >= w) || (ball_dx == -1 && ball_x + ball_w < 0)) {
     if (ball_x >= w) { // La pallina è uscita a destra (punto per il giocatore)
     lscore++;
@@ -240,6 +245,7 @@ void ball() {
     ball_dx = 1;
     rscore++;
   }
+
 
   delay(1000); // Breve pausa prima di reinizializzare la pallina
   initgame(); // Reinizializza la posizione di pallina e paddle per un nuovo round

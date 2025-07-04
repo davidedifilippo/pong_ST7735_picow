@@ -188,11 +188,14 @@ void rpaddle() {
 
   rpaddle_y = rpaddle_y + rpaddle_d;
 
+  if(ball_x >= w/2 ){ //test se supero la mezzeria gli concedo di muoversi
+
   if (ball_dx == -1) rpaddle_d = 0;
   else {
     if (rpaddle_y + paddle_h / 2 == target_y) rpaddle_d = 0;
     else if (rpaddle_y + paddle_h / 2 > target_y) rpaddle_d = -1;
     else rpaddle_d = 1;
+  }
   }
 
   if (rpaddle_y + paddle_h >= h && rpaddle_d == 1) rpaddle_d = 0;
@@ -213,15 +216,15 @@ void calc_target_y() {
     target_x = -1 * (w - ball_w);
   }
 
-  y = abs(target_x * (ball_dy / ball_dx) + ball_y);
+  y = abs(target_x * (ball_dy / ball_dx) + ball_y); //Questo calcola il cambiamento totale in Y che la palla subirebbe se continuasse a muoversi in linea retta per la distanza orizzontale target_x.
 
-  reflections = floor(y / h);
+  reflections = floor(y / h); //calcola il numero dei rimbalzi
 
   if (reflections % 2 == 0) {
-    target_y = y % h;
+    target_y = y % h; //se il numero dei rimbalzi è pari riporto la y colpita nel terzo campo di gioco al primo    
   } 
   else {
-    target_y = h - (y % h);
+    target_y = h - (y % h); //se il numero dei rimbalzi è dispari devo prendere il segmento complementare del secondo campo da gioco
   }
 }
 

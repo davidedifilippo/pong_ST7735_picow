@@ -39,6 +39,7 @@ int16_t lpaddle_ball_t = w - w / 4;
 int16_t rpaddle_ball_t = w / 4;
 
 int16_t target_y = 0;
+int16_t random_miss = 0; // Offset casuale per il bersaglio del paddle destro
 
 int16_t ball_x = 2;
 int16_t ball_y = 2;
@@ -62,6 +63,9 @@ int16_t dashline_y = dashline_h / 2;
 // Punteggi iniziali
 int16_t lscore = 0; // Punteggio del giocatore (tu)
 int16_t rscore = 0; // Punteggio dell'avversario
+
+// Punteggio per la vittoria ---
+#define MAX_SCORE 10
 
 // --- Definizioni per i pulsanti ---
 #define BUTTON_UP_PIN 3 // GP2 per spostare il paddle in su
@@ -134,6 +138,11 @@ void initgame() {
 
   // ball is placed on the center of the left paddle
   ball_y = lpaddle_y + (paddle_h / 2);
+  // Calcola l'errore casuale per il paddle destro ---
+  // Genera un valore casuale tra -15 e +15
+  random_miss = random(-15, 16); 
+  // Puoi aumentare/diminuire 15 per cambiare la difficoltà
+  // -----------------------------------------------------------------
   
   calc_target_y();
 
@@ -190,12 +199,17 @@ void rpaddle() {
 
   if(ball_x >= w/2 ){ //test se supero la mezzeria gli concedo di muoversi
 
-  if (ball_dx == -1) rpaddle_d = 0;
-  else {
-    if (rpaddle_y + paddle_h / 2 == target_y) rpaddle_d = 0;
-    else if (rpaddle_y + paddle_h / 2 > target_y) rpaddle_d = -1;
-    else rpaddle_d = 1;
-  }
+    if (ball_dx == -1) rpaddle_d = 0;
+    else {
+      // --- LOGICA MODIFICATA: Insegui il bersaglio imperfetto ---
+      int16_t imperfect_target = target_y + random_miss; // Applica l'errore!
+      
+      // La logica di movimento ora insegue imperfect_target
+      if (rpaddle_y + paddle_h / 2 == imperfect_target) rpaddle_d = 0;
+      else if (rpaddle_y + paddle_h / 2 > imperfect_target) rpaddle_d = -1;
+      else rpaddle_d = 1;
+      // ---------------------------------------------------------
+    }
   }
 
   if (rpaddle_y + paddle_h >= h && rpaddle_d == 1) rpaddle_d = 0;
@@ -239,20 +253,44 @@ void ball() {
   } else if (ball_dx == 1 && ball_x + ball_w == w - paddle_w && ball_y + ball_h >= rpaddle_y && ball_y <= rpaddle_y + paddle_h) { //Siamo sul paddle di dx 
     ball_dx = ball_dx * -1;
     //dly = random(5); // change speed of ball after paddle contact
-   
+    
   } else if ((ball_dx == 1 && ball_x >= w) || (ball_dx == -1 && ball_x + ball_w < 0)) {
     if (ball_x >= w) { // La pallina è uscita a destra (punto per il giocatore)
-    lscore++;
-    ball_dx = -1;
-  } else { // La pallina è uscita a sinistra (punto per l'avversario)
-    ball_dx = 1;
-    rscore++;
-  }
+      lscore++;
+      ball_dx = -1;
+    } else { // La pallina è uscita a sinistra (punto per l'avversario)
+      ball_dx = 1;
+      rscore++;
+    }
 
 
-  delay(1000); // Breve pausa prima di reinizializzare la pallina
-  initgame(); // Reinizializza la posizione di pallina e paddle per un nuovo round
-  return; // Esci dalla funzione ball() per non disegnare la pallina in una posizione sbagliata
+    // --- INIZIO NUOVA LOGICA DI FINE PARTITA ---
+    if (lscore >= MAX_SCORE || rscore >= MAX_SCORE) {
+      tft.fillScreen(BLACK); // Pulisci lo schermo
+      tft.setTextDatum(MC_DATUM); // Allinea al centro
+      tft.setTextColor(TFT_ORANGE, BLACK);
+      
+      // Messaggio di vittoria
+      if (lscore > rscore) {
+        tft.drawString("HAI VINTO!", w/2, h/2 - 10, 4);
+      } else {
+        tft.drawString("ITIS VINCE! ", w/2, h/2 - 10, 4); 
+      }
+      
+      tft.drawString("Partita finita a 10 punti.", w/2, h/2 + 20, 2);
+      
+      delay(4000); // Pausa di 4 secondi per visualizzare il vincitore
+      
+      // Reset dei punteggi per la nuova partita
+      lscore = 0;
+      rscore = 0;
+    }
+    // --- FINE NUOVA LOGICA DI FINE PARTITA ---
+
+
+    delay(1000); // Breve pausa prima di reinizializzare la pallina
+    initgame(); // Reinizializza la posizione di pallina e paddle per un nuovo round
+    return; // Esci dalla funzione ball() per non disegnare la pallina in una posizione sbagliata
   }
 
   if (ball_y > h - ball_w || ball_y < 0) {
@@ -265,6 +303,7 @@ void ball() {
   oldball_x = ball_x;
   oldball_y = ball_y;
 }
+
 
 void displayScores() {
   tft.setTextDatum(TL_DATUM); // Imposta l'allineamento del testo in alto a sinistra

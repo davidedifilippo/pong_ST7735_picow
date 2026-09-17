@@ -18,6 +18,9 @@
 
 TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 
+
+//const int TFT_BL_PIN = 22; //Pin di controllo della luminosità - solo prototipo 240x320
+
 int16_t h = 128;
 int16_t w = 160;
 
@@ -78,6 +81,9 @@ const long debounceDelay = 50; // Tempo di debounce in millisecondi
 // --- Fine delle nuove definizioni per i pulsanti ---
 
 void setup(void) {
+
+  //pinMode(TFT_BL_PIN, OUTPUT); solo 240x320
+  //analogWrite(TFT_BL_PIN, 255); // 255 = 100% duty cycle
   
   randomSeed(analogRead(0)*analogRead(1));
     

@@ -19,10 +19,10 @@
 TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 
 
-//const int TFT_BL_PIN = 22; //Pin di controllo della luminosità - solo prototipo 240x320
+const int TFT_BL_PIN = 22; //Pin di controllo della luminosità - solo prototipo 240x320
 
-int16_t h = 128;
-int16_t w = 160;
+int16_t h = 240;
+int16_t w = 315;
 
 int dly = 10;
 
@@ -82,14 +82,14 @@ const long debounceDelay = 50; // Tempo di debounce in millisecondi
 
 void setup(void) {
 
-  //pinMode(TFT_BL_PIN, OUTPUT); solo 240x320
-  //analogWrite(TFT_BL_PIN, 255); // 255 = 100% duty cycle
+  pinMode(TFT_BL_PIN, OUTPUT); //solo 240x320
+  analogWrite(TFT_BL_PIN, 255); // 255 = 100% duty cycle
   
   randomSeed(analogRead(0)*analogRead(1));
     
   tft.init();
 
-  tft.setRotation(1);
+  tft.setRotation(3);
 
   tft.fillScreen(BLACK);
   
@@ -158,7 +158,7 @@ void initgame() {
 
   tft.setTextDatum(TC_DATUM);
   tft.setTextColor(WHITE);
-  tft.drawString("ITIS Pong 2025", w/2, h-26 , 2);
+  tft.drawString("I.I.S D'AOSTA Street Pong 2026", w/2, h-26 , 2);
 
 
 }
